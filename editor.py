@@ -33,8 +33,8 @@ def _crop_for_poster(image, target_size):
 
     x, y, face_width, face_height = map(int, face)
     width, height = image.size
-    # Leave room around the head while giving the face a prominent position.
-    crop_height = min(height, max(face_height * 2, int(face_height * 2.5)))
+    # Frame the detected face with enough room below it to include the chest.
+    crop_height = min(height, int(face_height * 4.0))
     crop_width = min(width, int(crop_height * aspect))
     if crop_width / crop_height > aspect:
         crop_width = int(crop_height * aspect)
