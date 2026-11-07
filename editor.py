@@ -15,16 +15,6 @@ def _detect_face(image):
     return max(faces, key=lambda box: box[2] * box[3]) if len(faces) else None
 
 
-def _photo_area_height(overlay):
-    """Find the transparent portrait area above the first visible overlay row."""
-    alpha = np.asarray(overlay.getchannel("A"))
-    width, height = overlay.size
-    for y in range(height):
-        if np.count_nonzero(alpha[y] > 12) > width * 0.01:
-            return max(1, y)
-    return height
-
-
 def _crop_for_poster(image, target_size):
     target_width, target_height = target_size
     face = _detect_face(image)
@@ -65,9 +55,7 @@ def edit_image(input_path, output_path):
     overlay = Image.open(Config.OVERLAY_PATH).convert("RGBA")
 
     canvas_size = overlay.size
-    photo_height = _photo_area_height(overlay)
-    photo_area = (canvas_size[0], photo_height)
-    photo = _crop_for_poster(photo, photo_area).resize(photo_area, Image.Resampling.LANCZOS)
+    photo = _crop_for_poster(photo, canvas_size).resize(canvas_size, Image.Resampling.LANCZOS)
 
     canvas = Image.new("RGBA", canvas_size, (255, 255, 255, 255))
     canvas.alpha_composite(photo, (0, 0))
