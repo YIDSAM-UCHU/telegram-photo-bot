@@ -64,6 +64,12 @@ def edit_image(input_path, output_path):
     photo = ImageOps.exif_transpose(Image.open(input_path)).convert("RGBA")
     overlay = Image.open(Config.OVERLAY_PATH).convert("RGBA")
 
+    # Treat the overlay's alpha gradient as a cutout: visible poster pixels
+    # should be fully opaque instead of fading over the photo.
+    overlay_alpha = np.asarray(overlay.getchannel("A"))
+    overlay_alpha = np.where(overlay_alpha > 12, 255, 0).astype(np.uint8)
+    overlay.putalpha(Image.fromarray(overlay_alpha))
+
     canvas_size = overlay.size
     photo_height = _photo_area_height(overlay)
     photo_area = (canvas_size[0], photo_height)
